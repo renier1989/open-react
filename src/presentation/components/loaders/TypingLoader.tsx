@@ -1,6 +1,6 @@
 import './TypingLoader.css';
 interface Props{
-    className: string;
+    className?: string;
 }
 export const TypingLoader = ({className}:Props) => {
     return (
