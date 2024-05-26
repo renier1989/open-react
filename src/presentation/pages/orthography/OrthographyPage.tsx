@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { GptMessage, MyMessage, TextMessageBox, TextMessageBoxFile, TypingLoader } from "../../components"
+import { GptMessage, MyMessage, TextMessageBox, TypingLoader } from "../../components"
 
 interface Message {
   text: string;
@@ -45,15 +45,20 @@ export const OrthographyPage = () => {
 
           </div>
         </div>
-        {/* <TextMessageBox
+        <TextMessageBox
           onSendMessage={handlePost}
           placeholder="Escribe aqui tu pregunta"
           disabledCorrections={false}
-        /> */}
-        <TextMessageBoxFile
+        />
+        {/* <TextMessageBoxFile
           onSendMessage={handlePost}
           placeholder="Escribe aqui tu pregunta"
-        />
+        /> */}
+        {/* <TextMessageBoxSelect
+          onSendMessage={handlePost}
+          placeholder="Escribe aqui tu pregunta"
+          options={[{id:"1", text:"Hola Mundo"}, {id:"2", text:"Programando GPT."}]}
+        /> */}
       </div>
     </>
   )
