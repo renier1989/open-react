@@ -1,10 +1,15 @@
 import { useState } from "react"
-import { GptMessage, MyMessage, TextMessageBox, TypingLoader } from "../../components"
+import { GptMessage, GptOrthographyMessage, MyMessage, TextMessageBox, TypingLoader } from "../../components"
 import { orthographyUseCase } from "../../../core/use-cases";
 
 interface Message {
   text: string;
   isGpt: boolean;
+  info?: {
+    userScore: number;
+    errors: string[];
+    message: string;
+  }
 }
 
 export const OrthographyPage = () => {
@@ -14,15 +19,23 @@ export const OrthographyPage = () => {
   const handlePost = async (text: string) => {
     setIsLoading(true);
     // tomo los mensajes anterior y le agrego un nuevo que sera un mensaje mio (PRUEBA)
-    setMessages((prev) => [...prev, { text: text, isGpt: false }]); 
-    
+    setMessages((prev) => [...prev, { text: text, isGpt: false }]);
+
+    // consulta al backend por el usecase de orthographycheck
     const data = await orthographyUseCase(text);
     console.log(data);
     
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    // TODO: añadir el mensaje de GPT aqui 
+
+    // aqui cargo y muestro la informacion al usuario
+    const { ok, userScore, errors, message } = data;
+    if (!ok) {
+      setMessages((prev) => [...prev, { text: 'No se pudo procesar su petición 😥', isGpt: true }]);
+    } else {
+      setMessages((prev) => [...prev, { text: message, isGpt: true, info: { userScore, errors, message } }]);
+    }
+
+    setIsLoading(false);
+
   }
 
   return (
@@ -37,7 +50,7 @@ export const OrthographyPage = () => {
             {/* aqui valido si los mensajes son de GPT o son mios */}
             {messages.map((message, index) => (
               message.isGpt ?
-                (<GptMessage key={index} text="esto es de GPT." />)
+                (<GptOrthographyMessage key={index} {...message.info!} />)
                 :
                 (<MyMessage key={index} text={message.text} />)
             ))}
