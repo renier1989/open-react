@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { GptMessage, MyMessage, TextMessageBox, TypingLoader } from "../../components"
+import { orthographyUseCase } from "../../../core/use-cases";
 
 interface Message {
   text: string;
@@ -14,7 +15,10 @@ export const OrthographyPage = () => {
     setIsLoading(true);
     // tomo los mensajes anterior y le agrego un nuevo que sera un mensaje mio (PRUEBA)
     setMessages((prev) => [...prev, { text: text, isGpt: false }]); 
-    // TODO: aqui se llamara al useCase el caso de uso
+    
+    const data = await orthographyUseCase(text);
+    console.log(data);
+    
     setTimeout(() => {
       setIsLoading(false);
     }, 2000);
