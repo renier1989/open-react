@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { GptMessage, MyMessage, TypingLoader, TextMessageBox } from "../../components";
 import { prosConsStreamGeneratorUseCase } from "../../../core/use-cases";
 
@@ -8,16 +8,25 @@ interface Message {
 }
 
 export const ProsConsStreamPage = () => {
+  const abortController = useRef(new AbortController()); // esto se lo pasamos a la funcion generadora
+  const isRunning = useRef(false); // defino una bandera para saber si se esta ejecutando un stream de datos
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([])
 
   const handlePost = async (text: string) => {
+
+    if(isRunning){ // si esta en ejeccuion el stream de datos
+      abortController.current.abort(); // puedo abortar el anterior
+      abortController.current = new AbortController(); // y creo un nuevo abort controler para pasar a la funcion generadora
+    }
+
     setIsLoading(true);
+    isRunning.current = true; // inicio el stream de datos
     // tomo los mensajes anterior y le agrego un nuevo que sera un mensaje mio (PRUEBA)
     setMessages((prev) => [...prev, { text: text, isGpt: false }]);
 
     // forma de hacer el stream con una funcion generadora
-    const stream = await prosConsStreamGeneratorUseCase(text);
+    const stream = await prosConsStreamGeneratorUseCase(text, abortController.current.signal);
     setIsLoading(false);
     setMessages((messages) => [...messages, { text: '', isGpt: true }]);
     for await (const text of stream) {
@@ -27,7 +36,7 @@ export const ProsConsStreamPage = () => {
         return newMessage;
       })
     }
-
+    isRunning.current = false; // finaliza el stream de datos
 
 
 

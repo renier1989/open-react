@@ -1,4 +1,4 @@
-export async function* prosConsStreamGeneratorUseCase(prompt: string) {
+export async function* prosConsStreamGeneratorUseCase(prompt: string, abortSignal: AbortSignal) {
   try {
     const resp = await fetch(
       `${import.meta.env.VITE_GPT_API}/pros-cons-discusser-stream`,
@@ -8,7 +8,7 @@ export async function* prosConsStreamGeneratorUseCase(prompt: string) {
           "Content-type": "application/json",
         },
         body: JSON.stringify({ prompt }),
-        // TODO: abortSignal
+        signal: abortSignal
       }
     );
 
