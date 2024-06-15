@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { GptMessage, MyMessage, TypingLoader, TextMessageBox } from "../../components";
-import { prosConsDiscusserStreamUseCase } from "../../../core/use-cases";
+import { prosConsStreamGeneratorUseCase } from "../../../core/use-cases";
 
 interface Message {
   text: string;
@@ -16,32 +16,49 @@ export const ProsConsStreamPage = () => {
     // tomo los mensajes anterior y le agrego un nuevo que sera un mensaje mio (PRUEBA)
     setMessages((prev) => [...prev, { text: text, isGpt: false }]);
 
-    const reader = await prosConsDiscusserStreamUseCase(text);
+    // forma de hacer el stream con una funcion generadora
+    const stream = await prosConsStreamGeneratorUseCase(text);
     setIsLoading(false);
-
-    if(!reader) return;
-
-    const decoder = new TextDecoder();
-    let message = '';
-    setMessages((messages)=>[...messages, {text:message , isGpt:true}]);
-
-    // eslint-disable-next-line no-constant-condition
-    while(true){
-      const {value, done} = await reader.read();
-      if(done) break;
-
-      const decodedChunk = decoder.decode(value, {stream: true});
-      message+= decodedChunk;
-
-      setMessages((messages)=>{
+    setMessages((messages) => [...messages, { text: '', isGpt: true }]);
+    for await (const text of stream) {
+      setMessages((messages) => {
         const newMessage = [...messages];
-        newMessage[newMessage.length - 1].text = message;
+        newMessage[newMessage.length - 1].text = text;
         return newMessage;
       })
     }
 
 
-    
+
+
+
+    // // forma de hacer el stream 
+    // const reader = await prosConsDiscusserStreamUseCase(text);
+    // setIsLoading(false);
+
+    // if(!reader) return;
+
+    // const decoder = new TextDecoder();
+    // let message = '';
+    // setMessages((messages)=>[...messages, {text:message , isGpt:true}]);
+
+    // // eslint-disable-next-line no-constant-condition
+    // while(true){
+    //   const {value, done} = await reader.read();
+    //   if(done) break;
+
+    //   const decodedChunk = decoder.decode(value, {stream: true});
+    //   message+= decodedChunk;
+
+    //   setMessages((messages)=>{
+    //     const newMessage = [...messages];
+    //     newMessage[newMessage.length - 1].text = message;
+    //     return newMessage;
+    //   })
+    // }
+
+
+
   }
 
   return (
@@ -56,7 +73,7 @@ export const ProsConsStreamPage = () => {
             {/* aqui valido si los mensajes son de GPT o son mios */}
             {messages.map((message, index) => (
               message.isGpt ?
-                (<GptMessage key={index} text={message.text}/>)
+                (<GptMessage key={index} text={message.text} />)
                 :
                 (<MyMessage key={index} text={message.text} />)
             ))}
