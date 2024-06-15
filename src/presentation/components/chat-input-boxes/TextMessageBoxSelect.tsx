@@ -49,7 +49,7 @@ export const TextMessageBoxSelect = ({ onSendMessage, placeholder, disabledCorre
           >
             <option value="">Seleccione...</option>
             {options.map(({id,text})=>(
-              <option value={id}>{text}</option>
+              <option key={id} value={id}>{text}</option>
             ))}
           </select>
         </div>

@@ -23,8 +23,6 @@ export const OrthographyPage = () => {
 
     // consulta al backend por el usecase de orthographycheck
     const data = await orthographyUseCase(text);
-    console.log(data);
-    
 
     // aqui cargo y muestro la informacion al usuario
     const { ok, userScore, errors, message } = data;
