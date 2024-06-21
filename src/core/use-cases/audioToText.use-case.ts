@@ -1,35 +1,27 @@
-export const audioToTextUseCase = async( audioFile : File,prompt? : string) =>{
+import type { AudioToTextResponse } from "../../interfaces";
 
-    try {
-
-        console.log({audioFile, prompt});
-        
-
-        // const resp = await fetch(`${import.meta.env.VITE_GPT_API}/audio-to-text`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-type': 'application/json'
-        //     },
-        //     body: JSON.stringify({prompt,file})
-        // });
-
-        // if(!resp.ok) throw new Error("No se pudo generar el audio.");
-
-        // const audioFile = await resp.blob();
-        // const audioUrl = URL.createObjectURL(audioFile);
-        
-        // return {
-        //     ok: true,
-        //     mesagge: prompt,
-        //     audioUrl: audioUrl
-        // }
-
-    } catch (error) {
-        // return {
-        //     ok : false,
-        //     message: 'No se pudo generar el audio.'
-        // }
+export const audioToTextUseCase = async (audioFile: File, prompt?: string) => {
+  try {
+    // se prepara la data con el formdata para poderla enviar al endpoint
+    const formData = new FormData();
+    formData.append("file", audioFile);
+    // esto se hace asi porque el prompt es opcional
+    if (prompt) {
+      formData.append("prompt", prompt);
     }
 
+    const resp = await fetch(`${import.meta.env.VITE_GPT_API}/audio-to-text`, {
+      method: "POST",
+      body: formData,
+    });
 
-}
+    if (!resp.ok) throw new Error("No se pudo generar el audio.");
+
+    const data = (await resp.json()) as AudioToTextResponse;
+
+    return data;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
