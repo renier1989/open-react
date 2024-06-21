@@ -16,7 +16,26 @@ export const AudioToTextPage = () => {
     setMessages((prev) => [...prev, { text: text, isGpt: false }]);
     const resp = await audioToTextUseCase(audioFile, text);
     setIsLoading(false);
-    console.log(resp);
+
+    if(!resp) return;
+
+    const gptMessage = `
+## Transcipción:
+__Duración:__ ${Math.round(resp.duration)} Segundos
+## Texto:
+${resp.text}
+`
+setMessages((prev)=> [...prev, {text: gptMessage, isGpt:true}]);
+
+for(const segment of resp.segments){
+  const segmentMessage = `
+__De : ${Math.round(segment.start)} a ${Math.round(segment.end)}__ Segundos
+## ${segment.text}
+`
+setMessages((prev)=> [...prev, {text: segmentMessage, isGpt:true}]);
+
+}
+    
   }
 
   return (
@@ -31,9 +50,9 @@ export const AudioToTextPage = () => {
             {/* aqui valido si los mensajes son de GPT o son mios */}
             {messages.map((message, index) => (
               message.isGpt ?
-                (<GptMessage key={index} text="esto es de GPT." />)
+                (<GptMessage key={index} text={message.text} />)
                 :
-                (<MyMessage key={index} text={message.text} />)
+                (<MyMessage key={index} text={message.text === ''?'Transcribe el Audio': message.text} />)
             ))}
             {isLoading && (
               <div className="col-start-1 col-end-12 fade-in">
