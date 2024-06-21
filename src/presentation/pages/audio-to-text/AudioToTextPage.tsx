@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { GptMessage, MyMessage, TypingLoader, TextMessageBoxFile } from "../../components";
+import { audioToTextUseCase } from "../../../core/use-cases";
 
 interface Message {
     text: string;
@@ -10,11 +11,13 @@ export const AudioToTextPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [messages, setMessages] = useState<Message[]>([])
 
-    const handlePost = async (text: string) => {
+    const handlePost = async (text: string , audioFile : File) => {
         setIsLoading(true);
-        // tomo los mensajes anterior y le agrego un nuevo que sera un mensaje mio (PRUEBA)
+        
         setMessages((prev) => [...prev, { text: text, isGpt: false }]);
-        // TODO: aqui se llamara al useCase el caso de uso
+
+        await audioToTextUseCase(audioFile, text);
+        
         setTimeout(() => {
             setIsLoading(false);
         }, 2000);
@@ -49,6 +52,7 @@ export const AudioToTextPage = () => {
                     onSendMessage={handlePost}
                     placeholder="Escribe aqui tu texto"
                     disabledCorrections={false}
+                    accept="audio/*"
                 />
             </div>
         </>
