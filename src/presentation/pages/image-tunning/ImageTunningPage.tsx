@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 
 import { useState } from "react"
-import { GptMessage, MyMessage, TypingLoader, TextMessageBox, GptMessageImage } from "../../components";
+import { GptMessage, MyMessage, TypingLoader, TextMessageBox, GptMessageSelectableImage } from "../../components";
 import { imageGenerationUseCase, imageVariationUseCase } from "../../../core/use-cases";
 
 
@@ -16,7 +16,16 @@ interface Message {
 
 export const ImageTunningPage = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      isGpt: true,
+      text: 'Image Tunning',
+      info:{
+        imageUrl: 'http://localhost:3000/gpt/image-generation/1719172483999.png',
+        alt:'Image Tunning'
+      }
+    }
+  ])
 
   const [originalImageAndMask, setOriginalImageAndMask] = useState({
     original: undefined as string | undefined,
@@ -93,7 +102,10 @@ export const ImageTunningPage = () => {
             {/* aqui valido si los mensajes son de GPT o son mios */}
             {messages.map((message, index) => (
               message.isGpt ?
-                (<GptMessageImage key={index}
+                (
+                <GptMessageSelectableImage 
+                // <GptMessageImage 
+                  key={index}
                   text={message.text}
                   imageUrl={message.info?.imageUrl!}
                   alt={message.info?.alt!} 
