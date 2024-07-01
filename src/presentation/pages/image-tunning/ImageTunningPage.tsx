@@ -17,14 +17,14 @@ interface Message {
 export const ImageTunningPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    {
-      isGpt: true,
-      text: 'Image Tunning',
-      info:{
-        imageUrl: 'http://localhost:3000/gpt/image-generation/1719172483999.png',
-        alt:'Image Tunning'
-      }
-    }
+    // {
+    //   isGpt: true,
+    //   text: 'Image Tunning',
+    //   info:{
+    //     imageUrl: 'http://localhost:3000/gpt/image-generation/1719172483999.png',
+    //     alt:'Image Tunning'
+    //   }
+    // }
   ])
 
   const [originalImageAndMask, setOriginalImageAndMask] = useState({
@@ -53,9 +53,10 @@ export const ImageTunningPage = () => {
     setIsLoading(true);
     // tomo los mensajes anterior y le agrego un nuevo que sera un mensaje mio (PRUEBA)
     setMessages((prev) => [...prev, { text: text, isGpt: false }]);
+    const {original, mask} = originalImageAndMask;
 
     // TODO: aqui se llamara al useCase el caso de uso
-    const imageInfo = await imageGenerationUseCase(text);
+    const imageInfo = await imageGenerationUseCase(text, original, mask);
     setIsLoading(false);
 
     if (!imageInfo) {
