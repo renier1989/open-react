@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 
 interface Props{
@@ -9,10 +9,12 @@ interface Props{
     onImageSelected?: (imageUrl : string) => void;
 }
 
-export const GptMessageSelectableImage = ({imageUrl}:Props) => {
+export const GptMessageSelectableImage = ({imageUrl, onImageSelected}:Props) => {
 
     const originalImageRef = useRef<HTMLImageElement>();
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [coords, setCoords] = useState({x:0, y:0})
 
     useEffect(() => {
     
@@ -25,7 +27,74 @@ export const GptMessageSelectableImage = ({imageUrl}:Props) => {
         image.onload = ()=>{
             ctx?.drawImage(image, 0 ,0 , canvas.width, canvas.height);
         } 
-    }, [])
+    }, []);
+
+    // FUNCION PARA LA MINIPULACION DE LA IMAGEN EN EL CANVAS
+    const onMouseDown = (
+        event: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+      ) => {
+        setIsDrawing(true);
+    
+        // Obtener las coordenadas del mouse relativo al canvas 
+        const startX =
+          event.clientX - canvasRef.current!.getBoundingClientRect().left;
+        const startY =
+          event.clientY - canvasRef.current!.getBoundingClientRect().top;
+    
+        // console.log({startX, startY});
+        setCoords({ x: startX, y: startY });
+      };
+    
+      const onMouseUp = () => {
+        setIsDrawing(false);
+        const canvas = canvasRef.current!;
+        const url = canvas.toDataURL("image/png");
+        // console.log(url);
+        // https://jaredwinick.github.io/base64-image-viewer/
+        onImageSelected && onImageSelected(url);
+    
+      };
+      const onMouseMove = (
+        event: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+      ) => {
+        if (!isDrawing) return;
+    
+        const currentX =
+          event.clientX - canvasRef.current!.getBoundingClientRect().left;
+        const currentY =
+          event.clientY - canvasRef.current!.getBoundingClientRect().top;
+    
+        // Calcular el alto y ancho del rectángulo
+        const width = currentX - coords.x;
+        const height = currentY - coords.y;
+    
+        const canvaWidth = canvasRef.current!.width;
+        const canvaHeight = canvasRef.current!.height;
+    
+        // Limpiar el canva
+        const ctx = canvasRef.current!.getContext("2d")!;
+    
+        ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
+        ctx.drawImage(originalImageRef.current!, 0, 0, canvaWidth, canvaHeight);
+    
+        // Dibujar el rectangulo, pero en este caso, limpiaremos el espacio
+        // ctx. fillRect(coords.x, coords.y, width, height);
+        ctx.clearRect(coords.x, coords.y, width, height);
+      };
+    
+      const resetCanva = () => {
+        const ctx = canvasRef.current!.getContext("2d")!;
+        ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
+        ctx.drawImage(
+          originalImageRef.current!,
+          0,
+          0,
+          canvasRef.current!.width,
+          canvasRef.current!.height
+        );
+    
+        onImageSelected && onImageSelected(imageUrl);
+      };
     
 
 
@@ -41,7 +110,12 @@ export const GptMessageSelectableImage = ({imageUrl}:Props) => {
                     ref={canvasRef}
                     width={1024}
                     height={1024}
+                    onMouseDown={onMouseDown}
+                    onMouseUp={onMouseUp}
+                    onMouseMove={onMouseMove}
                 />
+
+                <button onClick={resetCanva} className="btn-primary mt-2">Borrar Seleccion</button>
 
 
                 {/* <img 

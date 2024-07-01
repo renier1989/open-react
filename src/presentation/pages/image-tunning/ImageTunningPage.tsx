@@ -83,7 +83,7 @@ export const ImageTunningPage = () => {
             <span>Editando</span>
             <img 
             className="border rounded-xl w-36 h-36 object-contain"
-            src={originalImageAndMask.original} 
+            src={originalImageAndMask.mask ?? originalImageAndMask.original} 
             alt="Imagen original" />
             <button onClick={handleVariation} className="btn-primary mt-2">Generar Variación</button>
           </div>
@@ -109,9 +109,9 @@ export const ImageTunningPage = () => {
                   text={message.text}
                   imageUrl={message.info?.imageUrl!}
                   alt={message.info?.alt!} 
-                  onImageSelected={(url)=>setOriginalImageAndMask({
-                    original: url,
-                    mask: undefined
+                  onImageSelected={(maskImageUrl)=>setOriginalImageAndMask({
+                    original: message.info?.imageUrl,
+                    mask: maskImageUrl
                   })}
                   />)
                 :
