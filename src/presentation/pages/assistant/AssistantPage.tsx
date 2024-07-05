@@ -33,12 +33,6 @@ export const AssistantPage = () => {
   }, [threadId])
   
 
-  
-  
-
-
-
-
   const handlePost = async (text: string) => {
 
     if(!threadId) {
@@ -51,11 +45,25 @@ export const AssistantPage = () => {
     setMessages((prev) => [...prev, { text: text, isGpt: false }]);
     console.log('id:', threadId);
     
-    await postQuestionUseCase(threadId, text);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    // TODO: añadir el mensaje de GPT aqui 
+    const replies = await postQuestionUseCase(threadId, text);
+    setIsLoading(false);
+    
+
+    for (const reply of replies) {
+      for (const message of reply.content) {
+        setMessages((prev)=> [...prev, 
+          {
+            text: message,
+            isGpt: (reply.role === 'assistant'),
+            info: reply
+          }
+        ])
+      }
+    }
+
+
+
+    
   }
 
   return (
